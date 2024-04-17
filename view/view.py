@@ -24,13 +24,9 @@ class App(tk.Tk):
 		button1.pack(expand=True, anchor="center", pady=10)
 		button2 = ttk.Button(self.login_frame, text='Registrar', command=self.register)
 		button2.pack(expand=True, anchor="center", pady=10)
+		button2 = ttk.Button(self.login_frame, text='Excluir Conta', command=self.deleteUser)
+		button2.pack(expand=True, anchor="center", pady=10)
 		
-
-
-
-
-
-
 		#================Tela De criação de personagem=============================
 		self.createchar_frame = tk.Frame(self)
 		ttk.Label(self.createchar_frame, text='Criar Personagem',font=("Helvetica, 24")).pack(anchor="center", pady=10)
@@ -56,23 +52,27 @@ class App(tk.Tk):
 
 	#========================================Tela principal=======================================
 	def drawMainScreen(self):
-		self.main_frame = tk.Frame(self, bg="#000000")
+		self.main_frame = tk.Frame(self)
 		ttk.Label(self.main_frame, text='Menu', font=("Helvetica, 24")).pack(anchor="center", pady=10)
-		self.l_frame = tk.Frame(self.main_frame, bg="red")
+		self.l_frame = tk.Frame(self.main_frame)
 		self.l_frame.pack(fill="both", expand=True, side="left")
-		self.r_frame = tk.Frame(self.main_frame, bg="green")
+		self.r_frame = tk.Frame(self.main_frame)
 		self.r_frame.pack(fill="both", expand=True, side="right")
 
 		chars = self.controler.getUserCharacters(self.logged_user)
 		for char in chars:
-			ttk.Label(self.l_frame, text=f'Nome: {char.name} |  Classe: {char._class}').pack(anchor="center", pady=10)
-
+			char_frame = tk.Frame(self.l_frame)
+			char_frame.pack(fill="both", expand=True)
+			ttk.Label(char_frame, text=f'Nome: {char.name} |  Classe: {char._class}', width=40).pack(anchor="center", side="left", padx=(30, 0))
+			ttk.Button(char_frame, text='Excluir', command= partial(self.deleteChar, char)).pack(expand=True, padx=0, side="right" )
 
 		button1m = ttk.Button(self.l_frame, text='Cirar Personagem', command= self.drawCreateCharScreen)
 		button1m.pack(expand=True, padx=0)
 
-
-	#================================== Função de login =====================================================
+		battle_button = ttk.Button(self.r_frame, text='Batalhar')
+		battle_button.pack(expand=True, padx=0)
+	#======================================= USUARIO
+	#============Função de login 
 	def login(self):
 		username = self.login_frame.winfo_children()[2].get()
 		password = self.login_frame.winfo_children()[4].get()
@@ -91,7 +91,7 @@ class App(tk.Tk):
 			self.main_frame.pack(fill="both", expand=True)
 		  
 
-	#========================== Função de registro ============================================
+	#========= Função de registro 
 	def register(self):
 		username = self.login_frame.winfo_children()[2].get()
 		password = self.login_frame.winfo_children()[4].get()
@@ -107,6 +107,14 @@ class App(tk.Tk):
 			self.login_frame.pack_forget()
 			self.title('Menu')
 			self.main_frame.pack(fill="both", expand=True)
+			
+	#=========Função de deletar
+	def deleteUser(self):
+		username = self.login_frame.winfo_children()[2].get()
+		password = self.login_frame.winfo_children()[4].get()
+		self.controler.deleteUser(username, password)
+		messagebox.showinfo("Apagar", "Usuário foi apagado")
+
 
 	#================ Função que esconde o menu principal e carrega a tela de criação de personagem ================
 	def drawCreateCharScreen(self):
@@ -128,6 +136,11 @@ class App(tk.Tk):
 			self.drawMainScreen()
 			self.main_frame.pack(fill="both", expand=True)
 
+	def deleteChar(self, char : Character):
+		self.controler.deleteUserCharacter(char, self.logged_user)
+		self.main_frame.pack_forget()
+		self.drawMainScreen()
+		self.main_frame.pack(fill="both", expand=True)
 
 
 	# function to unload either the instructions or game frame, change the window title and load menu frame
